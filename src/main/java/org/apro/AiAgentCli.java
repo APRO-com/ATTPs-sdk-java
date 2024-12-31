@@ -51,9 +51,8 @@ public class AiAgentCli {
 
   /**
    * get the agent address through the transactionReceipt.
-   * the {@txHash} should be the transaction that accepted the agent
+   * the txHash should be the transaction that accepted the agent
    * @param txHash: the transaction that accepted the agent
-   * @return: the agent address
    * @throws IOException
    */
   public String getAgentAddress(String txHash) throws IOException {

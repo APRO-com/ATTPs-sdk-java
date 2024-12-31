@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The demo for register an agent & verify the message.
+ * The demo for register an agent and verify the message.
  */
 public class Demo {
   public static void main(String[] args) {

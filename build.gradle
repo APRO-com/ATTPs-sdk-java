@@ -1,12 +1,98 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.jreleaser' version '1.15.0'
 }
 
-group = 'org.example'
-version = '1.0-SNAPSHOT'
+group = 'io.github.apro-oracle'
+archivesBaseName = "aiagent-java-sdk"
+version = '0.0.1'
 
 repositories {
     mavenCentral()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'io.github.apro-oracle'
+            artifactId = 'aiagent-java-sdk'
+
+            from components.java
+
+            pom {
+                name = 'APRO Ai Agent Java sdk'
+                description = 'APRO Ai Agent Java sdk'
+                url = 'https://github.com/APRO-Oracle/ai-agent-sdk-java'
+                inceptionYear = '2024'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'dev'
+                        name = 'dev@apro'
+                        email = 'dev@apro.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/APRO-Oracle/ai-agent-sdk-java.git'
+                    developerConnection = 'scm:git:ssh://github.com/APRO-Oracle/ai-agent-sdk-java.git'
+                    url = 'http://github.com/APRO-Oracle/ai-agent-sdk-java'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = layout.buildDirectory.dir('staging-deploy')
+        }
+    }
+}
+
+jreleaser {
+    signing {
+        active = 'ALWAYS'
+        armored = true
+    }
+    release {
+        github {
+            repoOwner = 'crypto009'
+            overwrite = true
+            skipRelease = true
+        }
+    }
+    deploy {
+        maven {
+            /*nexus2 {
+                'maven-central' {
+                    active = 'ALWAYS'
+                    url = 'https://s01.oss.sonatype.org/service/local'
+                    snapshotUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+                    closeRepository = true
+                    releaseRepository = true
+                    stagingRepository('build/staging-deploy')
+                }
+            }*/
+           //  Portal Publisher API
+            mavenCentral {
+                sonatype {
+                    active = 'ALWAYS'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    stagingRepository('build/staging-deploy')
+                }
+            }
+        }
+    }
 }
 
 dependencies {
