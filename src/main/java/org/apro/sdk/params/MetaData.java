@@ -1,6 +1,7 @@
-package org.util;
+package org.apro.sdk.params;
 
 import cn.hutool.core.util.HexUtil;
+import org.apro.sdk.util.GsonUtil;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.DynamicBytes;
@@ -10,7 +11,7 @@ import org.web3j.utils.Numeric;
 
 import java.util.*;
 
-public class MetaDataStruct extends DynamicStruct {
+public class MetaData extends DynamicStruct {
 
     private byte[] contentType;
 
@@ -31,7 +32,7 @@ public class MetaDataStruct extends DynamicStruct {
                         }));
     }
 
-    public MetaDataStruct(
+    public MetaData(
             byte[] contentType,
             byte[] encoding,
             byte[] compression) {
@@ -44,21 +45,21 @@ public class MetaDataStruct extends DynamicStruct {
         this.compression = compression;
     }
 
-    public MetaDataStruct(
+    public MetaData(
             DynamicBytes contentType,
             DynamicBytes encoding,
-            DynamicBytes signatureProof) {
-        super(contentType, encoding, signatureProof);
+            DynamicBytes compression) {
+        super(contentType, encoding, compression);
         this.contentType = contentType.getValue();
         this.encoding = encoding.getValue();
-        this.compression = signatureProof.getValue();
+        this.compression = compression.getValue();
     }
 
-    public static MetaDataStruct build(byte[] bytes) {
+    public static MetaData build(byte[] bytes) {
         List<Type> resultList =
                 FunctionReturnDecoder.decode(Numeric.toHexString(bytes), outputParameters);
 
-        return new MetaDataStruct(
+        return new MetaData(
                 (DynamicBytes) resultList.get(0),
                 (DynamicBytes) resultList.get(1),
                 (DynamicBytes) resultList.get(2));
@@ -97,12 +98,12 @@ public class MetaDataStruct extends DynamicStruct {
         return GsonUtil.toJson(map);
     }
 
-    public static MetaDataStruct fromJsonString(String json) {
+    public static MetaData fromJsonString(String json) {
         Map<String, String> map = GsonUtil.fromJson(json, HashMap.class);
         byte[] contentType = HexUtil.decodeHex(map.get("contentType"));
         byte[] encoding = HexUtil.decodeHex(map.get("encoding"));
         byte[] compression = HexUtil.decodeHex(map.get("compression"));
-        MetaDataStruct metaDataStruct = new MetaDataStruct(contentType, encoding, compression);
+        MetaData metaDataStruct = new MetaData(contentType, encoding, compression);
         return metaDataStruct;
     }
 }

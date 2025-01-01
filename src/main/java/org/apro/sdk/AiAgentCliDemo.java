@@ -1,8 +1,14 @@
-package org.apro;
+package org.apro.sdk;
 
+import org.apro.sdk.params.AgentSettings;
+import org.apro.sdk.params.VerifyParams;
 import org.bouncycastle.util.encoders.Hex;
-import org.tx.TransactionManager;
-import org.util.Utils;
+import org.apro.sdk.util.Utils;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
@@ -14,18 +20,18 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apro.sdk.config.ChainConfig.BSC_TEST;
+
 /**
  * The demo for register an agent and verify the message.
  */
-public class Demo {
-  public static void main(String[] args) {
-    System.out.println("Hello world!");
-  }
+public class AiAgentCliDemo {
 
   public void registerAgent() throws TransactionException, IOException {
     String address = "${EOA}"; // the user address
+    String addressPrikey = "";
     String proxyAddress = ""; // the proxy address of the Apro ai agent
-    AiAgentCli aiAgentCli = new AiAgentCli("${CHAIN_RPC}"); // specify the rpc server
+    AiAgentCli aiAgentCli = new AiAgentCli(BSC_TEST); // specify the rpc server
     BigInteger nonce = aiAgentCli.getNonce(address);
 
     List<String> signerList = new ArrayList<>();
@@ -34,26 +40,30 @@ public class Demo {
     signerList.add("${SIGNER2_ADDR}");
     // .....
 
-    RawTransaction rawTransaction = TransactionManager.buildRegisterAgentTx(
+    AgentSettings agentSettings = new AgentSettings();
+    agentSettings
+        .setSigners(new DynamicArray<>(Address.class, signerList.stream().map(Address::new).toList()))
+        .setThreshold(new Uint8(2))
+        .setConverterAddress(new Address("0x0000000000000000000000000000000000000000"))
+        .setVersion(new Utf8String("1.0"))
+        .setMessageId(new Utf8String("333833c0-0b15-449c-815e-8040eff67c8d"))
+        .setSourceAgentId(new Utf8String("2c167873-a6fc-4cee-b505-6c1ae2cd4763"))
+        .setSourceAgentName(new Utf8String("sdk test"))
+        .setTargetAgentId(new Utf8String(""))
+        .setTimestamp(new Uint256(System.currentTimeMillis()/1000))
+        .setMessageType(new Uint8(0))
+        .setPriority(new Uint8(1))
+        .setTtl(new Uint256(3600));
+
+    RawTransaction rawTransaction = AiAgentCli.buildRegisterAgentTx(
         nonce,
-        BigInteger.valueOf(100000000), // gas price
+        BigInteger.valueOf(1000000000), // gas price
         BigInteger.valueOf(10000000),  // gas limit
         proxyAddress,
-        signerList,
-        2,
-        "0x0000000000000000000000000000000000000000", // if the payload data is obtained from the DATA pull service of the APRO, change this to the specified address
-        "1.0",
-        "333833c0-0b15-449c-815e-8040eff67c8d",  // uuid
-        "2c167873-a6fc-4cee-b505-6c1ae2cd4763",
-        "sdk test",
-        "",
-        System.currentTimeMillis()/1000,
-        0,
-        1,
-        3600
+        agentSettings
     );
 
-    byte[] signedTx = TransactionManager.signTx(rawTransaction, address);
+    byte[] signedTx = aiAgentCli.signTx(rawTransaction, addressPrikey);
     EthSendTransaction ethSendTransaction = aiAgentCli.broadcast(signedTx);
     if (ethSendTransaction.hasError()) {
       System.out.println(ethSendTransaction.getError().getMessage());
@@ -63,6 +73,7 @@ public class Demo {
 
   public void verifyMessage() throws TransactionException, IOException {
     String address = "${EOA}"; // the user address
+    String addressPrikey = "";
     String proxyAddress = ""; // the proxy address of the Apro ai agent
     String agentAddress = "";  // The agent address that has been successfully registered
     String digest = "";  // The agent setting digest, obtained through the agent accept transaction log
@@ -75,22 +86,26 @@ public class Demo {
     signatures.add(data1);
     signatures.add(data2);
 
-    AiAgentCli aiAgentCli = new AiAgentCli("${CHAIN_RPC}");
+    AiAgentCli aiAgentCli = new AiAgentCli(BSC_TEST);
     BigInteger nonce = aiAgentCli.getNonce(address);
 
-    RawTransaction rawTransaction = TransactionManager.buildVerifyTx(
+    VerifyParams verifyParams = new VerifyParams();
+    verifyParams.setAgent(agentAddress)
+        .setSettingsDigest(digest)
+        .setData(data)
+        .setDataHash(dataHash)
+        .setSignatures(signatures)
+        .setMetaData(null);
+
+    RawTransaction rawTransaction = AiAgentCli.buildVerifyTx(
         nonce,
-        BigInteger.valueOf(100000000),
+        BigInteger.valueOf(1000000000),
         BigInteger.valueOf(10000000),
         proxyAddress,
-        agentAddress,
-        digest,
-        data,
-        dataHash,
-        signatures
+        verifyParams
     );
 
-    byte[] signedTx = TransactionManager.signTx(rawTransaction, address);
+    byte[] signedTx = aiAgentCli.signTx(rawTransaction, addressPrikey);
     EthSendTransaction ethSendTransaction = aiAgentCli.broadcast(signedTx);
     if (ethSendTransaction.hasError()) {
       System.out.println(ethSendTransaction.getError().getMessage());

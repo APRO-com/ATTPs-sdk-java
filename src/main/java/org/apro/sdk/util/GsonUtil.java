@@ -1,4 +1,4 @@
-package org.util;
+package org.apro.sdk.util;
 
 
 import com.google.gson.Gson;

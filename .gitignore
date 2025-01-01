@@ -3,3 +3,6 @@ keystore
 .idea
 build
 test
+secretKeyRingFile
+.jreleaser
+*.pgp
