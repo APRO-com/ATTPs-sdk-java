@@ -1,6 +1,5 @@
 package org.apro.sdk.params;
 
-import cn.hutool.core.util.HexUtil;
 import lombok.Getter;
 import org.apro.sdk.util.Utils;
 import org.web3j.abi.datatypes.*;
@@ -20,7 +19,7 @@ public class VerifyParams {
   private List<Sign.SignatureData> signatures;
   private byte[] merkleProofs;  // Not used yet, fill with null
   private byte[] zkProofs;  // Not used yet, fill with null
-  private MetaData metaData;
+  private MetaDataStruct metaDataStruct;
 
    public List<Type> toInputParameters() {
      Address agentAddress = new Address(this.getAgent());
@@ -36,9 +35,9 @@ public class VerifyParams {
          new DynamicBytes(Utils.toBytes(signatureProof))
      );
      DynamicStruct metadata = new DynamicStruct(
-         new Utf8String(HexUtil.encodeHexStr(metaData.getContentType())),
-         new Utf8String(HexUtil.encodeHexStr(metaData.getEncoding())),
-         new Utf8String(HexUtil.encodeHexStr(metaData.getCompression()))
+         new Utf8String(metaDataStruct.getContentType()),
+         new Utf8String(metaDataStruct.getEncoding()),
+         new Utf8String(metaDataStruct.getCompression())
      );
      DynamicStruct messagePayload = new DynamicStruct(
          new DynamicBytes(dataBytes),
@@ -85,8 +84,8 @@ public class VerifyParams {
     return this;
   }
 
-  public VerifyParams setMetaData(MetaData metaData) {
-    this.metaData = metaData;
+  public VerifyParams setMetaDataStruct(MetaDataStruct metaDataStruct) {
+    this.metaDataStruct = metaDataStruct;
     return this;
   }
 

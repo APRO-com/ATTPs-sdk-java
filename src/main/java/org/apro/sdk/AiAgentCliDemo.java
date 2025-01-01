@@ -95,7 +95,7 @@ public class AiAgentCliDemo {
         .setData(data)
         .setDataHash(dataHash)
         .setSignatures(signatures)
-        .setMetaData(null);
+        .setMetaDataStruct(null);
 
     RawTransaction rawTransaction = AiAgentCli.buildVerifyTx(
         nonce,
