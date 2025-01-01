@@ -16,6 +16,8 @@ public class VerifyParams {
   private String agent;
   private String settingsDigest;
   private String data;
+  // If the payload to be verified is obtained from the APRO DATA pull service, you should set the converterAddress to the specified address,
+  // And the dataHash in the verify payload should be calculated by the converterAddress.converter(data).
   private String dataHash;
   private List<Sign.SignatureData> signatures;
   private byte[] merkleProofs;  // Not used yet, fill with null
