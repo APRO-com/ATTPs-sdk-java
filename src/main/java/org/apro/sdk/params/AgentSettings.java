@@ -12,7 +12,9 @@ public class AgentSettings {
 
   private DynamicArray<Address> signers;
   private Uint8 threshold;
-  private Address converterAddress; // if the payload data is obtained from the DATA pull service of the APRO, change this to the specified address
+  // If the payload to be verified is obtained from the APRO DATA pull service, you should set the converterAddress to the specified address,
+  // And the dataHash in the verify payload should be calculated by the converterAddress.converter(data).
+  private Address converterAddress;
   private Utf8String version;
   private Utf8String messageId;
   private Utf8String sourceAgentId;

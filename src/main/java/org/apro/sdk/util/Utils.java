@@ -26,13 +26,44 @@ public class Utils {
     return Hash.sha3(HexUtil.decodeHex(input));
   }
 
-  public static boolean checkUUID(String input) {
-    try {
-      UUID.fromString(input);
-      return true;
-    } catch (IllegalArgumentException e) {
+  public static boolean checkUUID(String uuid) {
+    // UUID v4 must be 36 characters long
+    if (uuid == null || uuid.length() != 36) {
       return false;
     }
+
+    for (int i = 0; i < uuid.length(); i++) {
+      char c = uuid.charAt(i);
+
+      if (i == 8 || i == 13 || i == 18 || i == 23) {
+        // These positions must contain '-'
+        if (c != '-') {
+          return false;
+        }
+      } else if (i == 14) {
+        // The 14th character (index 13) must be '4'
+        if (c != '4') {
+          return false;
+        }
+      } else if (i == 19) {
+        // The 19th character (index 18) must be '8', '9', 'a', or 'b'
+        if (!(c == '8' || c == '9' || c == 'a' || c == 'b' || c == 'A' || c == 'B')) {
+          return false;
+        }
+      } else {
+        // All other characters must be a hexadecimal digit
+        if (!isHexDigit(c)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private static boolean isHexDigit(char c) {
+    return (c >= '0' && c <= '9') ||
+        (c >= 'a' && c <= 'f') ||
+        (c >= 'A' && c <= 'F');
   }
 
   public static String encodeSignaturesToString(List<Sign.SignatureData> signatures) {
