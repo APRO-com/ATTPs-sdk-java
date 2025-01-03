@@ -4,8 +4,7 @@ plugins {
     id 'org.jreleaser' version '1.15.0'
 }
 
-group = 'io.github.apro-oracle'
-archivesBaseName = "aiagent-java-sdk"
+group = 'com.apro.ai-agent'
 version = '0.0.1'
 
 repositories {
@@ -21,8 +20,8 @@ java {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId = 'io.github.apro-oracle'
-            artifactId = 'aiagent-java-sdk'
+            groupId = 'com.apro.ai-agent'
+            artifactId = 'aiagent-sdk'
 
             from components.java
 

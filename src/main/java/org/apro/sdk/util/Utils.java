@@ -13,10 +13,10 @@ import org.web3j.utils.Numeric;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Utils {
+
   public static byte[] toBytes(String hex) {
     String hexWithoutPrefix = Numeric.cleanHexPrefix(hex);
     return Numeric.hexStringToByteArray(hexWithoutPrefix);
