@@ -56,7 +56,7 @@ public class AiAgentCliDemo {
         .setPriority(new Uint8(1))
         .setTtl(new Uint256(3600));
 
-    RawTransaction rawTransaction = AiAgentCli.buildRegisterAgentTx(
+    RawTransaction rawTransaction = aiAgentCli.buildRegisterAgentTx(
         nonce,
         BigInteger.valueOf(5000000000L), // gas price
         BigInteger.valueOf(10000000),  // gas limit
@@ -99,9 +99,9 @@ public class AiAgentCliDemo {
         .setData(data)
         .setDataHash(dataHash)
         .setSignatures(signatures)
-        .setMetaData(null);
+        .setMetaDataStruct(null);
 
-    RawTransaction rawTransaction = AiAgentCli.buildVerifyTx(
+    RawTransaction rawTransaction = aiAgentCli.buildVerifyTx(
         nonce,
         BigInteger.valueOf(5000000000L),
         BigInteger.valueOf(10000000),

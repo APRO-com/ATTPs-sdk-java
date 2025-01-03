@@ -109,6 +109,9 @@ public class AgentSettings {
   }
 
   public AgentSettings setTargetAgentId(Utf8String targetAgentId) {
+    if (!Utils.checkUUID(targetAgentId.getValue())) {
+      throw new IllegalArgumentException("targetAgentId is not a legal UUID");
+    }
     this.targetAgentId = targetAgentId;
     return this;
   }
@@ -127,6 +130,10 @@ public class AgentSettings {
   }
 
   public AgentSettings setMessageType(Uint8 messageType) {
+    int messageTypeInt = messageType.getValue().intValue();
+    if (messageTypeInt != 0 && messageTypeInt != 1 && messageTypeInt != 2) {
+      throw new IllegalArgumentException("messageType is not a legal message type");
+    }
     this.messageType = messageType;
     return this;
   }
@@ -136,6 +143,10 @@ public class AgentSettings {
   }
 
   public AgentSettings setPriority(Uint8 priority) {
+    int priorityTypeInt = priority.getValue().intValue();
+    if (priorityTypeInt != 0 && priorityTypeInt != 1 && priorityTypeInt != 2) {
+      throw new IllegalArgumentException("priority is not a legal type");
+    }
     this.priority = priority;
     return this;
   }

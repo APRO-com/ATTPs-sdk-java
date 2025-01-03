@@ -1,5 +1,12 @@
 package org.apro.sdk.config;
 
+import org.apro.sdk.params.AgentSettingsStruct;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Event;
+
+import java.util.Arrays;
+
 public class Constants {
 
   // chain info
@@ -17,6 +24,13 @@ public class Constants {
   public static final String VERIFY_FUNCTION_NAME = "verify";
   public static final String CONVERTER_FUNCTION_NAME = "converter";
 
-  // topic
-  public static final String AGENT_REGISTER_TOPIC = "0x3172b53830cf93b3d5493d9629cee4c278961556a5c5eb0965dd018cfb66d629";
+
+  // event AgentRegistered(address indexed agent, Common.AgentSettings agentSettings);
+  public static Event AgentRegistered = new Event("AgentRegistered",
+          Arrays.asList(
+                  new TypeReference<Address>(true) {
+                  },
+                  new TypeReference<AgentSettingsStruct>(false) {
+                  }
+          ));
 }
