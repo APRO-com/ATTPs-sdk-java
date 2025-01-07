@@ -76,7 +76,7 @@ public class AiAgentCliDemo {
     String address = "${EOA}"; // the user address
     String addressPrikey = "";
     String proxyAddress = ""; // the proxy address of the Apro ai agent
-    String agentAddress = "";  // The agent address that has been successfully registered
+    String agentAddress = "";  // The agent address that has been successfully accepted
     String digest = "";  // The agent setting digest, obtained through the agent accept transaction log
     String data = Hex.toHexString("hello world".getBytes());
     // The dataHash is calculated by Keccak256 if the converterAddress is 0x0000000000000000000000000000000000000000.
