@@ -5,6 +5,7 @@ import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,15 @@ public class AgentSettings {
   public AgentSettings() {}
 
   public List<Type> toInputParameters() {
+    if (this.messageId == null) {
+      this.messageId = new Utf8String(Utils.generateUUID());
+    }
+    if (this.sourceAgentId == null) {
+      this.sourceAgentId = new Utf8String(Utils.generateUUID());
+    }
+    if (this.timestamp == null) {
+      this.timestamp = new Uint256(BigInteger.valueOf(System.currentTimeMillis()/1000));
+    }
     List<Type> inputParameters = new ArrayList<>();
     DynamicStruct agentConfig = new DynamicStruct(version, messageId, sourceAgentId, sourceAgentName,
         targetAgentId, timestamp, messageType, priority, ttl);
@@ -40,6 +50,9 @@ public class AgentSettings {
   }
 
   public AgentSettings setSigners(DynamicArray<Address> signers) {
+    if (signers.getValue().isEmpty()) {
+      throw new IllegalArgumentException("signers must not be empty");
+    }
     this.signers = signers;
     return this;
   }
@@ -100,6 +113,9 @@ public class AgentSettings {
   }
 
   public AgentSettings setSourceAgentName(Utf8String sourceAgentName) {
+    if (sourceAgentName.getValue().trim().isEmpty()) {
+      throw new IllegalArgumentException("sourceAgentName must not be empty");
+    }
     this.sourceAgentName = sourceAgentName;
     return this;
   }
@@ -121,6 +137,10 @@ public class AgentSettings {
   }
 
   public AgentSettings setTimestamp(Uint256 timestamp) {
+    if (timestamp.getValue().toString().matches("^\\d{13}$")) {
+      this.timestamp = new Uint256(timestamp.getValue().divide(BigInteger.valueOf(1000)));
+      return this;
+    }
     this.timestamp = timestamp;
     return this;
   }
@@ -156,6 +176,9 @@ public class AgentSettings {
   }
 
   public AgentSettings setTtl(Uint256 ttl) {
+    if (ttl.getValue().compareTo(BigInteger.ZERO) < 0) {
+      throw new IllegalArgumentException("ttl must be greater than or equal to zero");
+    }
     this.ttl = ttl;
     return this;
   }

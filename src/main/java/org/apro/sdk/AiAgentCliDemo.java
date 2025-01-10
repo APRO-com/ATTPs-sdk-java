@@ -98,6 +98,8 @@ public class AiAgentCliDemo {
         .setSettingsDigest(digest)
         .setData(data)
         .setDataHash(dataHash)
+        .setZkProofs(null)
+        .setMerkleProofs(null)
         .setSignatures(signatures)
         .setMetaDataStruct(null);
 

@@ -13,9 +13,13 @@ import org.web3j.utils.Numeric;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
+
+  private static final Pattern ETH_ADDRESS_PATTERN = Pattern.compile("^0x[a-fA-F0-9]{40}$");
 
   public static byte[] toBytes(String hex) {
     String hexWithoutPrefix = Numeric.cleanHexPrefix(hex);
@@ -24,6 +28,13 @@ public class Utils {
 
   public static byte[] toKeccak256(String input) {
     return Hash.sha3(HexUtil.decodeHex(input));
+  }
+
+  public static boolean isValidEthereumAddress(String address) {
+    if (address == null || address.isEmpty()) {
+      return false;
+    }
+    return ETH_ADDRESS_PATTERN.matcher(address).matches();
   }
 
   public static boolean checkUUID(String uuid) {
@@ -64,6 +75,50 @@ public class Utils {
     return (c >= '0' && c <= '9') ||
         (c >= 'a' && c <= 'f') ||
         (c >= 'A' && c <= 'F');
+  }
+
+  public static String generateUUID() {
+    StringBuilder uuid = new StringBuilder(36);
+    // Generate 8 random characters for the first part
+    for (int i = 0; i < 8; i++) {
+      uuid.append(getRandomHexChar());
+    }
+    uuid.append('-');
+    // Generate 4 random characters for the second part
+    for (int i = 0; i < 4; i++) {
+      uuid.append(getRandomHexChar());
+    }
+    uuid.append('-');
+    // Generate the version part: the 14th character must be '4'
+    uuid.append('4');
+    // Generate 3 random characters for the third part
+    for (int i = 0; i < 3; i++) {
+      uuid.append(getRandomHexChar());
+    }
+    uuid.append('-');
+    // Generate the variant part: the 19th character must be '8', '9', 'a', or 'b'
+    uuid.append(getRandomVariantChar());
+    // Generate 3 random characters for the fourth part
+    for (int i = 0; i < 3; i++) {
+      uuid.append(getRandomHexChar());
+    }
+    uuid.append('-');
+    // Generate 12 random characters for the last part
+    for (int i = 0; i < 12; i++) {
+      uuid.append(getRandomHexChar());
+    }
+    return uuid.toString();
+  }
+
+  private static char getRandomHexChar() {
+    int value = new Random().nextInt(16); // Generate a value between 0 and 15
+    return Integer.toHexString(value).charAt(0); // Convert the value to a hex character
+  }
+
+  private static char getRandomVariantChar() {
+    // Return a character that is either '8', '9', 'a', or 'b'
+    char[] variants = {'8', '9', 'a', 'b'};
+    return variants[new Random().nextInt(variants.length)];
   }
 
   public static String encodeSignaturesToString(List<Sign.SignatureData> signatures) {

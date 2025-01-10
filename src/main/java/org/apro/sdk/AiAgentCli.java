@@ -42,19 +42,25 @@ public class AiAgentCli {
             String to,
             AgentSettings agentSettings
     ) throws IOException {
+        if (!checkTxBaseParams(nonce, gasPrice, gasLimit)) {
+            throw new IllegalArgumentException("nonce|gasPrice|gasLimit must be less than zero");
+        }
         String version = this.getAgentVersion(to);
-        if (!version.equals(agentSettings.getVersion().toString())) {
+        if (agentSettings.getVersion() == null) {
+            agentSettings.setVersion(new Utf8String(version));
+        } else if (!version.equals(agentSettings.getVersion().toString())){
             throw new IllegalArgumentException("Agent version is not the same as the proxy agent's version");
         }
 
+        List<Type> inputParameters = agentSettings.toInputParameters();
         if (!isValidSourceAgentId(to, agentSettings.getSourceAgentId().getValue())) {
-            throw new IllegalArgumentException("Agent source agent id is already existed");
+            throw new IllegalArgumentException("Agent source id is already existed");
         }
 
         Function registerAgent = new Function(
-                Constants.REGISTER_AGENT_FUNCTION_NAME,
-                agentSettings.toInputParameters(),
-                Collections.emptyList());
+            Constants.REGISTER_AGENT_FUNCTION_NAME,
+            inputParameters,
+            Collections.emptyList());
         return RawTransaction.createTransaction(nonce, gasPrice, gasLimit,
                 to, BigInteger.ZERO, FunctionEncoder.encode(registerAgent));
     }
@@ -66,6 +72,9 @@ public class AiAgentCli {
             String to,
             VerifyParams verifyParams
     ) {
+        if (!checkTxBaseParams(nonce, gasPrice, gasLimit)) {
+            throw new IllegalArgumentException("nonce|gasPrice|gasLimit must be less than zero");
+        }
         Function verify = new Function(Constants.VERIFY_FUNCTION_NAME,
                 verifyParams.toInputParameters(),
                 Collections.emptyList());
@@ -77,21 +86,25 @@ public class AiAgentCli {
         return signTx(tx, this.config.getChainId(), priKey);
     }
 
+    public byte[] signTx(RawTransaction tx, Credentials credentials) {
+        return signTx(tx, this.config.getChainId(), credentials);
+    }
+
     public byte[] signTx(RawTransaction tx, long chainId, String priKey) {
         return TransactionEncoder.signMessage(tx, chainId, Credentials.create(priKey));
     }
 
+    public byte[] signTx(RawTransaction tx, long chainId, Credentials credentials) {
+        return TransactionEncoder.signMessage(tx, chainId, credentials);
+    }
+
     public EthSendTransaction broadcast(String hexSignedTransaction)
-            throws IOException, TransactionException {
-        EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexSignedTransaction).send();
-        if (ethSendTransaction.hasError()) {
-            throw new TransactionException(ethSendTransaction.getError().getMessage());
-        }
-        return ethSendTransaction;
+            throws IOException {
+        return web3j.ethSendRawTransaction(hexSignedTransaction).send();
     }
 
     public EthSendTransaction broadcast(byte[] signedTransaction)
-            throws IOException, TransactionException {
+            throws IOException {
         String hexValue = Numeric.toHexString(signedTransaction);
         return broadcast(hexValue);
     }
@@ -158,5 +171,11 @@ public class AiAgentCli {
             Collections.singletonList(new TypeReference<Bool>() {}));
         Bool result = (Bool) decoded.get(0);
         return result.getValue();
+    }
+
+    private boolean checkTxBaseParams(BigInteger nonce, BigInteger gasLimit, BigInteger gasPrice) {
+      return nonce.compareTo(BigInteger.ZERO) >= 0
+          && gasLimit.compareTo(BigInteger.ZERO) >= 0
+          && gasPrice.compareTo(BigInteger.ZERO) >= 0;
     }
 }
