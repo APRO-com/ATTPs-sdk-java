@@ -28,7 +28,8 @@ public class Utils {
   }
 
   public static byte[] toKeccak256(String input) {
-    return Hash.sha3(HexUtil.decodeHex(input));
+    String hexWithoutPrefix = Numeric.cleanHexPrefix(input);
+    return Hash.sha3(HexUtil.decodeHex(hexWithoutPrefix));
   }
 
   public static boolean isValidEthereumAddress(String address) {

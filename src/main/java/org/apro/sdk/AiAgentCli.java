@@ -9,6 +9,7 @@ import org.web3j.abi.EventEncoder;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
+import org.web3j.abi.datatypes.primitive.Byte;
 import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -139,6 +140,31 @@ public class AiAgentCli {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String converter(String converterAddress, String data) throws IOException {
+        Function function = new Function(
+            "converter",
+            Arrays.asList(new DynamicBytes(Numeric.hexStringToByteArray(data))),
+            Collections.singletonList(new TypeReference<Bytes>() {})
+        );
+
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        EthCall ethCall = web3j.ethCall(
+            org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction(
+                converterAddress,
+                converterAddress,
+                encodedFunction
+            ),
+            org.web3j.protocol.core.DefaultBlockParameterName.LATEST
+        ).send();
+
+        String rawResult = ethCall.getValue();
+        String trimmedResult = rawResult.substring(2);
+        String lengthHex = trimmedResult.substring(64, 128);
+        int length = Integer.parseInt(lengthHex, 16);
+        return "0x"+trimmedResult.substring(128, 128 + length * 2);
     }
 
     public String getFactory(String proxy) throws IOException {
