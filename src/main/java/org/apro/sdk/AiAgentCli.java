@@ -2,7 +2,7 @@ package org.apro.sdk;
 
 import org.apro.sdk.config.ChainConfig;
 import org.apro.sdk.config.Constants;
-import org.apro.sdk.params.AgentSettings;
+import org.apro.sdk.params.AgentSettingsParams;
 import org.apro.sdk.params.VerifyParams;
 import org.apro.sdk.util.ChainUtil;
 import org.web3j.abi.EventEncoder;
@@ -13,7 +13,6 @@ import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.*;
-import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
@@ -40,20 +39,20 @@ public class AiAgentCli {
             BigInteger gasPrice,
             BigInteger gasLimit,
             String to,
-            AgentSettings agentSettings
+            AgentSettingsParams agentSettingsParams
     ) throws IOException {
         if (!checkTxBaseParams(nonce, gasPrice, gasLimit)) {
             throw new IllegalArgumentException("nonce|gasPrice|gasLimit must be less than zero");
         }
         String version = this.getAgentVersion(to);
-        if (agentSettings.getVersion() == null) {
-            agentSettings.setVersion(new Utf8String(version));
-        } else if (!version.equals(agentSettings.getVersion().toString())){
+        if (agentSettingsParams.getVersion() == null) {
+            agentSettingsParams.setVersion(new Utf8String(version));
+        } else if (!version.equals(agentSettingsParams.getVersion().toString())){
             throw new IllegalArgumentException("Agent version is not the same as the proxy agent's version");
         }
 
-        List<Type> inputParameters = agentSettings.toInputParameters();
-        if (!isValidSourceAgentId(to, agentSettings.getSourceAgentId().getValue())) {
+        List<Type> inputParameters = agentSettingsParams.toInputParameters();
+        if (!isValidSourceAgentId(to, agentSettingsParams.getSourceAgentId().getValue())) {
             throw new IllegalArgumentException("Agent source id is already existed");
         }
 
