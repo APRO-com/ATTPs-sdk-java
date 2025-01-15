@@ -56,6 +56,10 @@ public class AgentSettingsParams {
   private Uint256 ttl;
 
   public List<Type> toInputParameters() {
+    Set<ConstraintViolation<AgentSettingsParams>> violations = validator.validate(this);
+    if (!violations.isEmpty()) {
+      throw new ConstraintViolationException(violations);
+    }
     if (this.signers.getValue().isEmpty()) {
       throw new IllegalArgumentException("signers must not be empty");
     }
@@ -88,11 +92,6 @@ public class AgentSettingsParams {
     }
     if (this.timestamp.getValue().toString().matches("^\\d{13}$")) {
       this.timestamp = new Uint256(this.timestamp.getValue().divide(BigInteger.valueOf(1000)));
-    }
-
-    Set<ConstraintViolation<AgentSettingsParams>> violations = validator.validate(this);
-    if (!violations.isEmpty()) {
-      throw new ConstraintViolationException(violations);
     }
 
     List<Type> inputParameters = new ArrayList<>();
