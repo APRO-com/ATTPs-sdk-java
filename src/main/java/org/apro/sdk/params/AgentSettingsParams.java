@@ -1,5 +1,6 @@
 package org.apro.sdk.params;
 
+import jakarta.validation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,13 +10,11 @@ import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -23,8 +22,10 @@ import java.util.List;
 @Builder
 public class AgentSettingsParams {
 
+  public static ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+  public static Validator validator = factory.getValidator();
+
   @NotNull(message = "Signers must not be null")
-  @NotEmpty(message = "Signers must not be empty")
   private DynamicArray<Address> signers;
 
   @NotNull(message = "Threshold must not be null")
@@ -32,25 +33,17 @@ public class AgentSettingsParams {
 
   private Address converterAddress;
 
-  @NotNull(message = "Version must not be null")
   private Utf8String version;
 
-  @NotNull(message = "MessageId must not be null")
-  @Pattern(regexp = Utils.UUID_REGEX, message = "MessageId is not a valid UUID")
   private Utf8String messageId;
 
-  @NotNull(message = "SourceAgentId must not be null")
-  @Pattern(regexp = Utils.UUID_REGEX, message = "SourceAgentId is not a valid UUID")
   private Utf8String sourceAgentId;
 
   private Utf8String sourceAgentName;
 
   @NotNull(message = "TargetAgentId must not be null")
-  @Pattern(regexp = Utils.UUID_REGEX, message = "TargetAgentId is not a valid UUID")
   private Utf8String targetAgentId;
 
-  @NotNull(message = "Timestamp must not be null")
-  @PositiveOrZero(message = "Timestamp must be greater than or equal to zero")
   private Uint256 timestamp;
 
   @NotNull(message = "MessageType must not be null")
@@ -60,7 +53,6 @@ public class AgentSettingsParams {
   private Uint8 priority;
 
   @NotNull(message = "TTL must not be null")
-  @PositiveOrZero(message = "TTL must be greater than or equal to zero")
   private Uint256 ttl;
 
   public List<Type> toInputParameters() {
@@ -97,6 +89,12 @@ public class AgentSettingsParams {
     if (this.timestamp.getValue().toString().matches("^\\d{13}$")) {
       this.timestamp = new Uint256(this.timestamp.getValue().divide(BigInteger.valueOf(1000)));
     }
+
+    Set<ConstraintViolation<AgentSettingsParams>> violations = validator.validate(this);
+    if (!violations.isEmpty()) {
+      throw new ConstraintViolationException(violations);
+    }
+
     List<Type> inputParameters = new ArrayList<>();
     DynamicStruct agentConfig = new DynamicStruct(version, messageId, sourceAgentId, sourceAgentName,
         targetAgentId, timestamp, messageType, priority, ttl);

@@ -1,5 +1,6 @@
 package org.apro.sdk.params;
 
+import jakarta.validation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,11 +11,9 @@ import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.crypto.Sign;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Set;
 
 import static org.apro.sdk.util.Utils.encodeSignaturesToString;
 
@@ -25,22 +24,22 @@ import static org.apro.sdk.util.Utils.encodeSignaturesToString;
 @AllArgsConstructor
 public class VerifyParams {
 
+  public static ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+  public static Validator validator = factory.getValidator();
+
   @NotNull
-  @Pattern(regexp = "^0x[a-fA-F0-9]{40}$", message = "Invalid Ethereum address")
   private String agent;
 
   @NotNull
-  @Size(min = 64, max = 64, message = "Settings digest must be exactly 64 characters")
   private String settingsDigest;
 
-  @NotEmpty(message = "Data cannot be empty")
+  @NotNull(message = "Data cannot be empty")
   private String data;
 
   @NotNull
-  @Pattern(regexp = "^[a-fA-F0-9]{64}|0x[a-fA-F0-9]{64}$", message = "Invalid data hash")
   private String dataHash;
 
-  @NotEmpty(message = "Signatures must contain at least one signature")
+  @NotNull(message = "Signatures must contain at least one signature")
   private List<Sign.SignatureData> signatures;
 
   private byte[] zkProofs;
@@ -50,6 +49,12 @@ public class VerifyParams {
   private MetaDataStruct metaDataStruct;
 
   public List<Type> toInputParameters() {
+
+    Set<ConstraintViolation<VerifyParams>> violations = validator.validate(this);
+    if (!violations.isEmpty()) {
+      throw new ConstraintViolationException(violations);
+    }
+
     Address agentAddress = new Address(this.getAgent());
     Bytes32 digest = new Bytes32(Utils.toBytes(this.getSettingsDigest()));
     Bytes32 dataHashBytes = new Bytes32(Utils.toBytes(this.getDataHash()));
