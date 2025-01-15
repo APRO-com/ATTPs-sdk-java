@@ -69,7 +69,7 @@ public class AgentSettingsParams {
     if (this.sourceAgentId == null || this.sourceAgentId.getValue().isEmpty()) {
       this.sourceAgentId = new Utf8String(Utils.generateUUID());
     }
-    if (this.targetAgentId == null || this.targetAgentId.getValue().isEmpty()) {
+    if (this.targetAgentId.getValue().isEmpty()) {
       throw new IllegalArgumentException("targetAgentId must not be empty");
     }
     if (!Utils.checkUUID(this.messageId.getValue()) || !Utils.checkUUID(this.sourceAgentId.getValue())
