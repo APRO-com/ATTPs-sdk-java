@@ -7,15 +7,15 @@ This is the java version of APRO Ai Agent SDK.
 ### Gradle
 
 ```
-implementation group: 'io.github.apro-oracle', name: 'aiagent-java-sdk', version: 'X.X.X'
+implementation group: 'com.apro.ai-agent', name: 'aiagent-sdk', version: 'X.X.X'
 ```
 
 ### Maven
 
 ```
 <dependency>
-    <groupId>io.github.apro-oracle</groupId>
-    <artifactId>aiagent-java-sdk</artifactId>
+    <groupId>com.apro.ai-agent</groupId>
+    <artifactId>aiagent-sdk</artifactId>
     <version>X.X.X</version>
 </dependency>
 ```
@@ -109,7 +109,9 @@ EthSendTransaction ethSendTransaction = aiAgentCli.broadcast(signedTx);
 ```
 
 ## Contributing
-We welcome contributions! Please see the CONTRIBUTING.md for details on how to contribute to this project.
+Thank you for considering helping out with the source code! We welcome contributions from anyone on the internet, and are grateful for even the smallest of fixes!
+
+If you'd like to contribute to this project, please fork, fix, commit and send a pull request for the maintainers to review and merge into the main code base.
 
 ## License
-This project is licensed under the Apache License 2.0. See the LICENSE file for details.
+This project is licensed under the [GNU Lesser General Public License v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html).
