@@ -1,5 +1,6 @@
 package org.apro.sdk;
 
+import lombok.Getter;
 import org.apro.sdk.config.ChainConfig;
 import org.apro.sdk.config.Constants;
 import org.apro.sdk.params.AgentSettingsParams;
@@ -9,10 +10,8 @@ import org.web3j.abi.EventEncoder;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
-import org.web3j.abi.datatypes.primitive.Byte;
 import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
@@ -23,12 +22,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.apro.sdk.config.Constants.AgentRegistered;
+import static org.apro.sdk.config.Constants.*;
 
+@Getter
 public class AiAgentCli {
 
-    public ChainConfig config;
-    public Web3j web3j;
+    private final ChainConfig config;
+    private final Web3j web3j;
 
     public AiAgentCli(ChainConfig config) {
         this.config = config;
@@ -82,33 +82,6 @@ public class AiAgentCli {
                 to, BigInteger.ZERO, FunctionEncoder.encode(verify));
     }
 
-    public byte[] signTx(RawTransaction tx, String priKey) {
-        return signTx(tx, this.config.getChainId(), priKey);
-    }
-
-    public byte[] signTx(RawTransaction tx, Credentials credentials) {
-        return signTx(tx, this.config.getChainId(), credentials);
-    }
-
-    public byte[] signTx(RawTransaction tx, long chainId, String priKey) {
-        return TransactionEncoder.signMessage(tx, chainId, Credentials.create(priKey));
-    }
-
-    public byte[] signTx(RawTransaction tx, long chainId, Credentials credentials) {
-        return TransactionEncoder.signMessage(tx, chainId, credentials);
-    }
-
-    public EthSendTransaction broadcast(String hexSignedTransaction)
-            throws IOException {
-        return web3j.ethSendRawTransaction(hexSignedTransaction).send();
-    }
-
-    public EthSendTransaction broadcast(byte[] signedTransaction)
-            throws IOException {
-        String hexValue = Numeric.toHexString(signedTransaction);
-        return broadcast(hexValue);
-    }
-
     /**
      * get the agent address through the transactionReceipt.
      * the txHash should be the transaction that accepted the agent
@@ -130,70 +103,60 @@ public class AiAgentCli {
         return "Transaction not found or still pending.";
     }
 
-    public BigInteger getNonce(String address) {
-        try {
-            EthGetTransactionCount response = web3j.ethGetTransactionCount(address,
-                    DefaultBlockParameterName.PENDING).send();
-            return response.getTransactionCount();
-        } catch (IOException e) {
-            throw new RuntimeException("io error", e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public String converter(String converterAddress, String data) throws IOException {
         Function function = new Function(
-            "converter",
+            CONVERTER_FUNCTION_NAME,
             Arrays.asList(new DynamicBytes(Numeric.hexStringToByteArray(data))),
-            Collections.singletonList(new TypeReference<Bytes>() {})
+            Collections.singletonList(new TypeReference<DynamicBytes>() {})
         );
 
-        String encodedFunction = FunctionEncoder.encode(function);
-
-        EthCall ethCall = web3j.ethCall(
-            org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction(
-                converterAddress,
-                converterAddress,
-                encodedFunction
-            ),
-            org.web3j.protocol.core.DefaultBlockParameterName.LATEST
-        ).send();
-
-        String rawResult = ethCall.getValue();
-        String trimmedResult = rawResult.substring(2);
-        String lengthHex = trimmedResult.substring(64, 128);
-        int length = Integer.parseInt(lengthHex, 16);
-        return "0x"+trimmedResult.substring(128, 128 + length * 2);
+        List<Type> decoded = ChainUtil.getResult(this.web3j, converterAddress, function);
+        DynamicBytes result = (DynamicBytes) decoded.get(0);
+        return Numeric.toHexString(result.getValue());
     }
 
     public String getFactory(String proxy) throws IOException {
-        List<Type> decoded = ChainUtil.getResult(this.web3j, proxy, "agentFactory", Arrays.asList(),
-            Collections.singletonList(new TypeReference<Address>() {}));
+        Function function = new Function(
+            AGENT_FACTORY_FUNCTION_NAME,
+            Arrays.asList(),
+            Collections.singletonList(new TypeReference<Address>() {})
+        );
+        List<Type> decoded = ChainUtil.getResult(this.web3j, proxy, function);
         Address result = (Address) decoded.get(0);
         return result.getValue();
     }
 
     public String getManager(String proxy) throws IOException {
-        List<Type> decoded = ChainUtil.getResult(this.web3j, proxy,"agentManager", Arrays.asList(),
-            Collections.singletonList(new TypeReference<Address>() {}));
+        Function function = new Function(
+            AGENT_MANAGER_FUNCTION_NAME,
+            Arrays.asList(),
+            Collections.singletonList(new TypeReference<Address>() {})
+        );
+        List<Type> decoded = ChainUtil.getResult(this.web3j, proxy,function);
         Address result = (Address) decoded.get(0);
         return result.getValue();
     }
 
     public String getAgentVersion(String proxy) throws IOException {
+        Function function = new Function(
+            AGENT_VERSION_FUNCTION_NAME,
+            Arrays.asList(),
+            Collections.singletonList(new TypeReference<Utf8String>() {})
+        );
         String manager = getManager(proxy);
-        List<Type> decoded = ChainUtil.getResult(this.web3j, manager, "agentVersion", Arrays.asList(),
-            Collections.singletonList(new TypeReference<Utf8String>() {}));
+        List<Type> decoded = ChainUtil.getResult(this.web3j, manager, function);
         Utf8String result = (Utf8String) decoded.get(0);
         return result.getValue();
     }
 
     public boolean isValidSourceAgentId(String proxy, String agentId) throws IOException {
-        String manager = getManager(proxy);
-        List<Type> decoded = ChainUtil.getResult(this.web3j, manager, "isValidSourceAgentId",
+        Function function = new Function(
+            IS_VALID_SOURCE_AGENT_ID_FUNCTION_NAME,
             Arrays.asList(new Utf8String(agentId)),
-            Collections.singletonList(new TypeReference<Bool>() {}));
+            Collections.singletonList(new TypeReference<Bool>() {})
+        );
+        String manager = getManager(proxy);
+        List<Type> decoded = ChainUtil.getResult(this.web3j, manager, function);
         Bool result = (Bool) decoded.get(0);
         return result.getValue();
     }

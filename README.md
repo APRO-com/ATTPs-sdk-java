@@ -1,18 +1,22 @@
 # APRO Ai Agent JAVA SDK
 
-This is the java version of APRO Ai Agent SDK.
+This is the Java version of the APRO Ai Agent SDK.
+
+## Requirements
+
+- **Java 17 or above**: Ensure Java 17 or a later version installed.
 
 ## Integration
 
 ### Gradle
 
-```
+```gradle
 implementation group: 'com.apro.ai-agent', name: 'aiagent-sdk', version: 'X.X.X'
 ```
 
 ### Maven
 
-```
+```xml
 <dependency>
     <groupId>com.apro.ai-agent</groupId>
     <artifactId>aiagent-sdk</artifactId>
@@ -22,18 +26,18 @@ implementation group: 'com.apro.ai-agent', name: 'aiagent-sdk', version: 'X.X.X'
 
 ## Usage
 
-### Register an agent
+### Register an Agent
 ```java
 String address = "${EOA}"; // the user address
 String addressPrikey = "";
-String proxyAddress = ""; // the proxy address of the Apro ai agent
-AiAgentCli aiAgentCli = new AiAgentCli(BSC_TEST); // specify the rpc server
-BigInteger nonce = aiAgentCli.getNonce(address);
+String proxyAddress = ""; // the proxy address of the Apro AI agent
+AiAgentCli aiAgentCli = new AiAgentCli(BSC_TEST); // specify the RPC server
+BigInteger nonce = ChainUtil.getNonce(address, aiAgentCli.getWeb3j());
 
 List<String> signerList = new ArrayList<>();
 // add the signers
-    signerList.add("${SIGNER1_ADDR}");
-    signerList.add("${SIGNER2_ADDR}");
+signerList.add("${SIGNER1_ADDR}");
+signerList.add("${SIGNER2_ADDR}");
 // .....
 
 AgentSettingsParams agentSettingsParams = AgentSettingsParams.builder()
@@ -41,7 +45,7 @@ AgentSettingsParams agentSettingsParams = AgentSettingsParams.builder()
     .threshold(new Uint8(2))
     // If the payload to be verified is obtained from a third service that the data format needs to transform, 
     // you should set the converterAddress to the specified address
-    .converterAddress(new Address("0x0000000000000000000000000000000000000000"))
+    .converterAddress(Address.DEFAULT)
     .version(new Utf8String("1.0"))
     .messageId(new Utf8String("333833c0-0b15-449c-815e-8040eff67c8d"))
     .sourceAgentId(new Utf8String("2c167873-a6fc-4cee-b505-6c1ae2cd4763"))
@@ -61,21 +65,22 @@ RawTransaction rawTransaction = aiAgentCli.buildRegisterAgentTx(
     agentSettingsParams
 );
 
-byte[] signedTx = aiAgentCli.signTx(rawTransaction, addressPrikey);
-EthSendTransaction ethSendTransaction = aiAgentCli.broadcast(signedTx);
+byte[] signedTx = ChainUtil.signTx(rawTransaction, aiAgentCli.getConfig().getChainId(), addressPrikey);
+
+EthSendTransaction ethSendTransaction = ChainUtil.broadcast(signedTx, aiAgentCli.getWeb3j());
 ```
 
-### Verify the agent data
+### Verify the Agent Data
 ```java
 String address = "${EOA}"; // the user address
 String addressPrikey = "";
-String proxyAddress = ""; // the proxy address of the Apro ai agent
+String proxyAddress = ""; // the proxy address of the Apro AI agent
 String agentAddress = "";  // The agent address that has been successfully accepted
 String digest = "";  // The agent setting digest, obtained through the agent accept transaction log
 String data = Hex.toHexString("hello world".getBytes());
 // The dataHash is calculated by Keccak256 if the converterAddress is 0x0000000000000000000000000000000000000000.
 // But if the data is obtained from a third service that the data format needs to transform, 
-// you should set the converterAddress when register the agent,
+// you should set the converterAddress when registering the agent,
 // The dataHash should be calculated by the converterAddress.converter(data).
 byte[] dataHashBytes = Utils.toKeccak256(data);
 String dataHash = Hex.toHexString(dataHashBytes);
@@ -86,7 +91,7 @@ signatures.add(data1);
 signatures.add(data2);
 
 AiAgentCli aiAgentCli = new AiAgentCli(BSC_TEST);
-BigInteger nonce = aiAgentCli.getNonce(address);
+BigInteger nonce = ChainUtil.getNonce(address, aiAgentCli.getWeb3j());
 
 VerifyParams verifyParams = VerifyParams.builder()
     .agent(agentAddress)
@@ -104,14 +109,16 @@ RawTransaction rawTransaction = aiAgentCli.buildVerifyTx(
     verifyParams
 );
 
-byte[] signedTx = aiAgentCli.signTx(rawTransaction, addressPrikey);
-EthSendTransaction ethSendTransaction = aiAgentCli.broadcast(signedTx);
+byte[] signedTx = ChainUtil.signTx(rawTransaction, aiAgentCli.getConfig().getChainId(), addressPrikey);
+
+EthSendTransaction ethSendTransaction = ChainUtil.broadcast(signedTx, aiAgentCli.getWeb3j());
 ```
 
 ## Contributing
-Thank you for considering helping out with the source code! We welcome contributions from anyone on the internet, and are grateful for even the smallest of fixes!
+Thank you for considering helping out with the source code! We welcome contributions from anyone on the internet and are grateful for even the smallest of fixes!
 
-If you'd like to contribute to this project, please fork, fix, commit and send a pull request for the maintainers to review and merge into the main code base.
+If you'd like to contribute to this project, please fork, fix, commit, and send a pull request for the maintainers to review and merge into the main code base.
 
 ## License
 This project is licensed under the [GNU Lesser General Public License v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html).
+

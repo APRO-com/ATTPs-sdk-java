@@ -39,6 +39,7 @@ public class AgentSettingsParams {
 
   private Utf8String sourceAgentId;
 
+  @NotNull(message = "sourceAgentName must not be null")
   private Utf8String sourceAgentName;
 
   @NotNull(message = "TargetAgentId must not be null")
@@ -62,6 +63,9 @@ public class AgentSettingsParams {
     }
     if (this.signers.getValue().isEmpty()) {
       throw new IllegalArgumentException("signers must not be empty");
+    }
+    if (this.signers.getValue().size() < threshold.getValue().intValue()) {
+      throw new IllegalArgumentException("threshold must be less than or equal to signers length");
     }
     if (this.messageId == null || this.messageId.getValue().isEmpty()) {
       this.messageId = new Utf8String(Utils.generateUUID());
