@@ -1,8 +1,9 @@
 package org.apro.sdk;
 
+import lombok.Getter;
 import org.apro.sdk.config.ChainConfig;
 import org.apro.sdk.config.Constants;
-import org.apro.sdk.params.AgentSettings;
+import org.apro.sdk.params.AgentSettingsParams;
 import org.apro.sdk.params.VerifyParams;
 import org.apro.sdk.util.ChainUtil;
 import org.web3j.abi.EventEncoder;
@@ -11,9 +12,7 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
 import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.*;
-import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
@@ -23,12 +22,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.apro.sdk.config.Constants.AgentRegistered;
+import static org.apro.sdk.config.Constants.*;
 
+@Getter
 public class AiAgentCli {
 
-    public ChainConfig config;
-    public Web3j web3j;
+    private final ChainConfig config;
+    private final Web3j web3j;
 
     public AiAgentCli(ChainConfig config) {
         this.config = config;
@@ -40,21 +40,27 @@ public class AiAgentCli {
             BigInteger gasPrice,
             BigInteger gasLimit,
             String to,
-            AgentSettings agentSettings
+            AgentSettingsParams agentSettingsParams
     ) throws IOException {
+        if (!checkTxBaseParams(nonce, gasPrice, gasLimit)) {
+            throw new IllegalArgumentException("nonce|gasPrice|gasLimit must be less than zero");
+        }
         String version = this.getAgentVersion(to);
-        if (!version.equals(agentSettings.getVersion().toString())) {
+        if (agentSettingsParams.getVersion() == null) {
+            agentSettingsParams.setVersion(new Utf8String(version));
+        } else if (!version.equals(agentSettingsParams.getVersion().toString())){
             throw new IllegalArgumentException("Agent version is not the same as the proxy agent's version");
         }
 
-        if (!isValidSourceAgentId(to, agentSettings.getSourceAgentId().getValue())) {
-            throw new IllegalArgumentException("Agent source agent id is already existed");
+        List<Type> inputParameters = agentSettingsParams.toInputParameters();
+        if (!isValidSourceAgentId(to, agentSettingsParams.getSourceAgentId().getValue())) {
+            throw new IllegalArgumentException("Agent source id is already existed");
         }
 
         Function registerAgent = new Function(
-                Constants.REGISTER_AGENT_FUNCTION_NAME,
-                agentSettings.toInputParameters(),
-                Collections.emptyList());
+            Constants.REGISTER_AGENT_FUNCTION_NAME,
+            inputParameters,
+            Collections.emptyList());
         return RawTransaction.createTransaction(nonce, gasPrice, gasLimit,
                 to, BigInteger.ZERO, FunctionEncoder.encode(registerAgent));
     }
@@ -66,34 +72,14 @@ public class AiAgentCli {
             String to,
             VerifyParams verifyParams
     ) {
+        if (!checkTxBaseParams(nonce, gasPrice, gasLimit)) {
+            throw new IllegalArgumentException("nonce|gasPrice|gasLimit must be less than zero");
+        }
         Function verify = new Function(Constants.VERIFY_FUNCTION_NAME,
                 verifyParams.toInputParameters(),
                 Collections.emptyList());
         return RawTransaction.createTransaction(nonce, gasPrice, gasLimit,
                 to, BigInteger.ZERO, FunctionEncoder.encode(verify));
-    }
-
-    public byte[] signTx(RawTransaction tx, String priKey) {
-        return signTx(tx, this.config.getChainId(), priKey);
-    }
-
-    public byte[] signTx(RawTransaction tx, long chainId, String priKey) {
-        return TransactionEncoder.signMessage(tx, chainId, Credentials.create(priKey));
-    }
-
-    public EthSendTransaction broadcast(String hexSignedTransaction)
-            throws IOException, TransactionException {
-        EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexSignedTransaction).send();
-        if (ethSendTransaction.hasError()) {
-            throw new TransactionException(ethSendTransaction.getError().getMessage());
-        }
-        return ethSendTransaction;
-    }
-
-    public EthSendTransaction broadcast(byte[] signedTransaction)
-            throws IOException, TransactionException {
-        String hexValue = Numeric.toHexString(signedTransaction);
-        return broadcast(hexValue);
     }
 
     /**
@@ -117,46 +103,67 @@ public class AiAgentCli {
         return "Transaction not found or still pending.";
     }
 
-    public BigInteger getNonce(String address) {
-        try {
-            EthGetTransactionCount response = web3j.ethGetTransactionCount(address,
-                    DefaultBlockParameterName.PENDING).send();
-            return response.getTransactionCount();
-        } catch (IOException e) {
-            throw new RuntimeException("io error", e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public String converter(String converterAddress, String data) throws IOException {
+        Function function = new Function(
+            CONVERTER_FUNCTION_NAME,
+            Arrays.asList(new DynamicBytes(Numeric.hexStringToByteArray(data))),
+            Collections.singletonList(new TypeReference<DynamicBytes>() {})
+        );
+
+        List<Type> decoded = ChainUtil.getResult(this.web3j, converterAddress, function);
+        DynamicBytes result = (DynamicBytes) decoded.get(0);
+        return Numeric.toHexString(result.getValue());
     }
 
     public String getFactory(String proxy) throws IOException {
-        List<Type> decoded = ChainUtil.getResult(this.web3j, proxy, "agentFactory", Arrays.asList(),
-            Collections.singletonList(new TypeReference<Address>() {}));
+        Function function = new Function(
+            AGENT_FACTORY_FUNCTION_NAME,
+            Arrays.asList(),
+            Collections.singletonList(new TypeReference<Address>() {})
+        );
+        List<Type> decoded = ChainUtil.getResult(this.web3j, proxy, function);
         Address result = (Address) decoded.get(0);
         return result.getValue();
     }
 
     public String getManager(String proxy) throws IOException {
-        List<Type> decoded = ChainUtil.getResult(this.web3j, proxy,"agentManager", Arrays.asList(),
-            Collections.singletonList(new TypeReference<Address>() {}));
+        Function function = new Function(
+            AGENT_MANAGER_FUNCTION_NAME,
+            Arrays.asList(),
+            Collections.singletonList(new TypeReference<Address>() {})
+        );
+        List<Type> decoded = ChainUtil.getResult(this.web3j, proxy,function);
         Address result = (Address) decoded.get(0);
         return result.getValue();
     }
 
     public String getAgentVersion(String proxy) throws IOException {
+        Function function = new Function(
+            AGENT_VERSION_FUNCTION_NAME,
+            Arrays.asList(),
+            Collections.singletonList(new TypeReference<Utf8String>() {})
+        );
         String manager = getManager(proxy);
-        List<Type> decoded = ChainUtil.getResult(this.web3j, manager, "agentVersion", Arrays.asList(),
-            Collections.singletonList(new TypeReference<Utf8String>() {}));
+        List<Type> decoded = ChainUtil.getResult(this.web3j, manager, function);
         Utf8String result = (Utf8String) decoded.get(0);
         return result.getValue();
     }
 
     public boolean isValidSourceAgentId(String proxy, String agentId) throws IOException {
-        String manager = getManager(proxy);
-        List<Type> decoded = ChainUtil.getResult(this.web3j, manager, "isValidSourceAgentId",
+        Function function = new Function(
+            IS_VALID_SOURCE_AGENT_ID_FUNCTION_NAME,
             Arrays.asList(new Utf8String(agentId)),
-            Collections.singletonList(new TypeReference<Bool>() {}));
+            Collections.singletonList(new TypeReference<Bool>() {})
+        );
+        String manager = getManager(proxy);
+        List<Type> decoded = ChainUtil.getResult(this.web3j, manager, function);
         Bool result = (Bool) decoded.get(0);
         return result.getValue();
+    }
+
+    private boolean checkTxBaseParams(BigInteger nonce, BigInteger gasLimit, BigInteger gasPrice) {
+      return nonce.compareTo(BigInteger.ZERO) >= 0
+          && gasLimit.compareTo(BigInteger.ZERO) >= 0
+          && gasPrice.compareTo(BigInteger.ZERO) >= 0;
     }
 }

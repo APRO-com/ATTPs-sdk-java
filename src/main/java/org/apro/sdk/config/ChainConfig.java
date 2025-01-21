@@ -22,12 +22,12 @@ public class ChainConfig {
   public static ChainConfig BSC_MAIN = new ChainConfig(
       BSC_MAIN_RPC,
       BSC_MAIN_CHAINID,
-      BSC_TEST_PROXY_ADDRESS
+      BSC_MAIN_PROXY_ADDRESS
   );
 
   public static ChainConfig BSC_TEST = new ChainConfig(
       BSC_TEST_RPC,
       BSC_TEST_CHAINID,
-      BSC_MAIN_PROXY_ADDRESS
+      BSC_TEST_PROXY_ADDRESS
   );
 }

@@ -23,6 +23,10 @@ public class Constants {
   public static final String REGISTER_AGENT_FUNCTION_NAME = "createAndRegisterAgent";
   public static final String VERIFY_FUNCTION_NAME = "verify";
   public static final String CONVERTER_FUNCTION_NAME = "converter";
+  public static final String AGENT_FACTORY_FUNCTION_NAME = "agentFactory";
+  public static final String AGENT_MANAGER_FUNCTION_NAME = "agentManager";
+  public static final String AGENT_VERSION_FUNCTION_NAME = "agentVersion";
+  public static final String IS_VALID_SOURCE_AGENT_ID_FUNCTION_NAME = "isValidSourceAgentId";
 
 
   // event AgentRegistered(address indexed agent, Common.AgentSettings agentSettings);
