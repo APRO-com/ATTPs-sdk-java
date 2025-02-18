@@ -1,6 +1,6 @@
 # APRO Ai Agent JAVA SDK
 
-This is the Java version of the APRO Ai Agent SDK.
+This is the Java version of the APRO ATTPs Agent SDK.
 
 ## Requirements
 
@@ -11,15 +11,15 @@ This is the Java version of the APRO Ai Agent SDK.
 ### Gradle
 
 ```gradle
-implementation group: 'com.apro.ai-agent', name: 'aiagent-sdk', version: 'X.X.X'
+implementation group: 'com.apro.attps', name: 'attps-sdk', version: 'X.X.X'
 ```
 
 ### Maven
 
 ```xml
 <dependency>
-    <groupId>com.apro.ai-agent</groupId>
-    <artifactId>aiagent-sdk</artifactId>
+    <groupId>com.apro.attps</groupId>
+    <artifactId>attps-sdk</artifactId>
     <version>X.X.X</version>
 </dependency>
 ```

@@ -4,8 +4,8 @@ plugins {
     id 'org.jreleaser' version '1.15.0'
 }
 
-group = 'com.apro.ai-agent'
-version = '0.0.6'
+group = 'com.apro.attps'
+version = '0.0.7'
 
 repositories {
     mavenCentral()
@@ -20,14 +20,14 @@ java {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId = 'com.apro.ai-agent'
-            artifactId = 'aiagent-sdk'
+            groupId = 'com.apro.attps'
+            artifactId = 'attps-sdk'
 
             from components.java
 
             pom {
-                name = 'APRO Ai Agent Java sdk'
-                description = 'APRO Ai Agent Java sdk'
+                name = 'APRO ATTPs Agent Java sdk'
+                description = 'APRO ATTPs Agent Java sdk'
                 url = 'https://github.com/APRO-Oracle/ai-agent-sdk-java'
                 inceptionYear = '2024'
                 licenses {
