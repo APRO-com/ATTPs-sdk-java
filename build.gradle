@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.apro.attps'
-version = '0.0.8'
+version = '0.0.9'
 
 repositories {
     mavenCentral()
@@ -26,9 +26,9 @@ publishing {
             from components.java
 
             pom {
-                name = 'APRO ATTPs Agent Java sdk'
-                description = 'APRO ATTPs Agent Java sdk'
-                url = 'https://github.com/APRO-Oracle/ai-agent-sdk-java'
+                name = 'APRO ATTPs Java sdk'
+                description = 'APRO ATTPs Java sdk'
+                url = 'https://github.com/APRO-com/ATTPs-sdk-java'
                 inceptionYear = '2024'
                 licenses {
                     license {
@@ -44,9 +44,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:https://github.com/APRO-Oracle/ai-agent-sdk-java.git'
-                    developerConnection = 'scm:git:ssh://github.com/APRO-Oracle/ai-agent-sdk-java.git'
-                    url = 'http://github.com/APRO-Oracle/ai-agent-sdk-java'
+                    connection = 'scm:git:https://github.com/APRO-com/ATTPs-sdk-java.git'
+                    developerConnection = 'scm:git:ssh://github.com/APRO-com/ATTPs-sdk-java.git'
+                    url = 'http://github.com/APRO-com/ATTPs-sdk-java'
                 }
             }
         }
@@ -99,20 +99,20 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     annotationProcessor('org.projectlombok:lombok:1.18.22')
-    api 'org.projectlombok:lombok:1.18.22'
+    implementation 'org.projectlombok:lombok:1.18.22'
 
-    api("cn.hutool:hutool-all:5.7.3")
-    api("com.squareup.okhttp3:okhttp:4.9.3")
-    api 'com.github.mrmike:ok2curl:0.8.0'
-    api("com.google.code.gson:gson:2.10.1")
+    implementation("cn.hutool:hutool-all:5.7.3")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation 'com.github.mrmike:ok2curl:0.8.0'
+    implementation("com.google.code.gson:gson:2.10.1")
 
-    api group: 'com.github.arteam', name: 'simple-json-rpc-client', version: '1.3'
+    implementation group: 'com.github.arteam', name: 'simple-json-rpc-client', version: '1.3'
 
-    api('com.google.guava:guava:29.0-jre')
+    implementation('com.google.guava:guava:29.0-jre')
    // implementation('javax.validation:validation-api:2.0.1.Final')
-    api('org.hibernate.validator:hibernate-validator:8.0.0.Final')
-    api 'jakarta.validation:jakarta.validation-api:3.0.0'
-    api('org.glassfish:jakarta.el:4.0.2')
+    implementation('org.hibernate.validator:hibernate-validator:8.0.0.Final')
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.0'
+    implementation('org.glassfish:jakarta.el:4.0.2')
 
     api("org.web3j:utils:${web3jVersion}")
     api("org.web3j:core:${web3jVersion}")

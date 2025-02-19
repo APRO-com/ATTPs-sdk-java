@@ -1,6 +1,6 @@
-# APRO Ai Agent JAVA SDK
+# APRO ATTPs JAVA SDK
 
-This is the Java version of the APRO ATTPs Agent SDK.
+This is the Java version of the APRO ATTPs SDK.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ This is the Java version of the APRO ATTPs Agent SDK.
 ### Gradle
 
 ```gradle
-implementation group: 'com.apro.attps', name: 'attps-sdk', version: 'X.X.X'
+implementation group: 'com.apro.attps', name: 'attps-sdk', version: '0.0.9'
 ```
 
 ### Maven
@@ -20,7 +20,7 @@ implementation group: 'com.apro.attps', name: 'attps-sdk', version: 'X.X.X'
 <dependency>
     <groupId>com.apro.attps</groupId>
     <artifactId>attps-sdk</artifactId>
-    <version>X.X.X</version>
+    <version>0.0.9</version>
 </dependency>
 ```
 
@@ -30,7 +30,7 @@ implementation group: 'com.apro.attps', name: 'attps-sdk', version: 'X.X.X'
 ```java
 String address = "${EOA}"; // the user address
 String addressPrikey = "";
-String proxyAddress = ""; // the proxy address of the Apro AI agent
+String proxyAddress = ""; // the proxy address of the Apro ATTPs agent
 AiAgentCli aiAgentCli = new AiAgentCli(BSC_TEST); // specify the RPC server
 BigInteger nonce = ChainUtil.getNonce(address, aiAgentCli.getWeb3j());
 
@@ -74,7 +74,7 @@ EthSendTransaction ethSendTransaction = ChainUtil.broadcast(signedTx, aiAgentCli
 ```java
 String address = "${EOA}"; // the user address
 String addressPrikey = "";
-String proxyAddress = ""; // the proxy address of the Apro AI agent
+String proxyAddress = ""; // the proxy address of the Apro ATTPs agent
 String agentAddress = "";  // The agent address that has been successfully accepted
 String digest = "";  // The agent setting digest, obtained through the agent accept transaction log
 String data = Hex.toHexString("hello world".getBytes());
