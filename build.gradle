@@ -113,6 +113,10 @@ dependencies {
     implementation('org.hibernate.validator:hibernate-validator:8.0.0.Final')
     implementation 'jakarta.validation:jakarta.validation-api:3.0.0'
     implementation('org.glassfish:jakarta.el:4.0.2')
+    // Jakarta XML Binding API
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
+    // Jakarta XML Binding Implementation
+    implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.3'
 
     api("org.web3j:utils:${web3jVersion}")
     api("org.web3j:core:${web3jVersion}")
