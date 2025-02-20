@@ -102,7 +102,7 @@ public class VRFClientTest {
     String benchmarkRequestId = "6f71619f1e6ea42616c9bbdc8fe001511e0c37b72373dc259857b29c1e61597c";
     long version = 1L;
     String targetAgentId = "f2464336-fbcf-4603-bda5-ce65c0318fb6";
-    String customerSeed = "1234";
+    String customerSeed = "0x1234";
     String callbackUri = "http://127.0.0.1:8888/api/vrf/proof";
     long requestTimestamp = 1739265192L;
 
